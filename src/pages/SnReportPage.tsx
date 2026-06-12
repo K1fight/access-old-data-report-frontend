@@ -55,7 +55,6 @@ const SnReportPage: React.FC = () => {
     setLoading(true);
 
     try {
-      const API_BASE = import.meta.env.VITE_API_BASE || '';
       const params = {
         customerCode: customerCode.trim() || null,
         warehouseCode: warehouseCode.trim() || null,
@@ -68,7 +67,7 @@ const SnReportPage: React.FC = () => {
 
       console.log('查询参数:', params);
 
-      const res = await fetch(`${API_BASE}/api/oldData/snReport`, {
+      const res = await fetch('/api/oldData/snReport', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(params),

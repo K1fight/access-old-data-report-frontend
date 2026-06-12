@@ -74,7 +74,6 @@ const OrderReportPage: React.FC = () => {
     setLoading(true);
 
     try {
-      const API_BASE = import.meta.env.VITE_API_BASE || '';
       const params = {
         warehouseCode: warehouseCode.trim() || null,
         orderType: orderType.trim() || null,
@@ -86,7 +85,7 @@ const OrderReportPage: React.FC = () => {
 
       console.log('查询参数:', params);
 
-      const res = await fetch(`${API_BASE}/api/oldData/orderReport`, {
+      const res = await fetch('/api/oldData/orderReport', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(params),
