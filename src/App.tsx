@@ -17,7 +17,6 @@ const App: React.FC = () => {
     switch (activeMenu) {
       case 'snReport':    return <SnReportPage />;
       case 'orderReport': return <OrderReportPage />;
-      default:            return null;
     }
   };
 
@@ -26,7 +25,6 @@ const App: React.FC = () => {
   return (
     <Layout style={{ minHeight: '100vh', background: '#f0f2f5' }}>
       <Sidebar activeKey={activeMenu} onSelect={setActiveMenu} />
-
       <Layout>
         <Header
           style={{
@@ -53,7 +51,12 @@ const App: React.FC = () => {
               borderRadius: 20,
             }}
           >
-            {new Date().toLocaleDateString('zh-CN', { weekday: 'long', year: 'numeric', month: '2-digit', day: '2-digit' })}
+            {new Date().toLocaleDateString('zh-CN', {
+              weekday: 'long',
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+            })}
           </span>
         </Header>
         <Content style={{ margin: 24, minHeight: 280 }}>

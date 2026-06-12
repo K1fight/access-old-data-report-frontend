@@ -50,11 +50,12 @@ const SnReportPage: React.FC = () => {
   const [snBarcode, setSnBarcode] = useState('');
   const [scanTimeRange, setScanTimeRange] = useState<[dayjs.Dayjs | null, dayjs.Dayjs | null] | null>(null);
 
-  /* 查询 - 调用后端接口 */
+  /* 查询 */
   const handleSearch = async () => {
     setLoading(true);
 
     try {
+      const API_BASE = import.meta.env.VITE_API_BASE || '';
       const params = {
         customerCode: customerCode.trim() || null,
         warehouseCode: warehouseCode.trim() || null,
@@ -67,8 +68,7 @@ const SnReportPage: React.FC = () => {
 
       console.log('查询参数:', params);
 
-      // CRA 开发模式下通过 src/setupProxy.js 代理到后端，无 CORS 问题
-      const res = await fetch('/api/oldData/snReport', {
+      const res = await fetch(`${API_BASE}/api/oldData/snReport`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(params),
@@ -159,7 +159,7 @@ const SnReportPage: React.FC = () => {
     <span>{dayjs(text).format('YYYY-MM-DD HH:mm:ss')}</span>
   ) : <span style={{ color: '#bfbfbf' }}>-</span>;
 
-  /* 表格列 - 按后端实体字段顺序 */
+  /* 表格列 */
   const columns: ColumnsType<SnRecord> = [
     { title: 'ID_SN', dataIndex: 'idSn', width: 100, align: 'right' },
     { title: 'Initial ID SN', dataIndex: 'initialIdSn', width: 150, render: renderCode },
@@ -211,7 +211,6 @@ const SnReportPage: React.FC = () => {
               style={INPUT_STYLE}
             />
           </div>
-
           <div>
             <label style={{ display: 'block', fontSize: 12, color: '#8c8c8c', marginBottom: 6, fontWeight: 500 }}>
               Warehouse Code
@@ -224,7 +223,6 @@ const SnReportPage: React.FC = () => {
               style={INPUT_STYLE}
             />
           </div>
-
           <div>
             <label style={{ display: 'block', fontSize: 12, color: '#8c8c8c', marginBottom: 6, fontWeight: 500 }}>
               Order Type
@@ -237,7 +235,6 @@ const SnReportPage: React.FC = () => {
               style={INPUT_STYLE}
             />
           </div>
-
           <div>
             <label style={{ display: 'block', fontSize: 12, color: '#8c8c8c', marginBottom: 6, fontWeight: 500 }}>
               Order Ref
@@ -251,7 +248,6 @@ const SnReportPage: React.FC = () => {
               style={INPUT_STYLE}
             />
           </div>
-
           <div>
             <label style={{ display: 'block', fontSize: 12, color: '#8c8c8c', marginBottom: 6, fontWeight: 500 }}>
               SN Barcode
@@ -265,7 +261,6 @@ const SnReportPage: React.FC = () => {
               style={INPUT_STYLE}
             />
           </div>
-
           <div>
             <label style={{ display: 'block', fontSize: 12, color: '#8c8c8c', marginBottom: 6, fontWeight: 500 }}>
               Scan Time
@@ -334,7 +329,7 @@ const SnReportPage: React.FC = () => {
           }}
           scroll={{ x: 3500 }}
           locale={{ emptyText: <div style={{ padding: 40, textAlign: 'center', color: '#bfbfbf' }}><p>🔍 请输入筛选条件后点击「查询」</p></div> }}
-          rowClassName={(record, index) => index % 2 === 0 ? '' : 'table-row-stripe'}
+          rowClassName={(_, index) => index % 2 === 0 ? '' : 'table-row-stripe'}
         />
       </Card>
 

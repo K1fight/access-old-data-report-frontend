@@ -12,7 +12,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* 让 Layout 占满全屏 */
 #root {
   min-height: 100vh;
 }

@@ -5,24 +5,20 @@ import dayjs from 'dayjs';
 import { writeFile, utils } from 'xlsx';
 import type { ColumnsType } from 'antd/es/table';
 
-/* ── 类型 ─────────────────────────────── */
+/* ── 类型 - 按后端实体字段 ─────────────── */
 interface OrderRecord {
   key: string;
-  // 基础信息
   entity: string;
   customerCode: string;
   customerAbbrev: string;
   warehouseCode: string;
   warehouseName: string;
-  // 订单信息
   orderType: string;
   orderRef: string;
   orderIB: string;
   orderRefRMA: string;
-  // 日期
   orderReceiveDate: string;
   orderEntryDate: string;
-  // 物流信息
   shipmentNo: string;
   adr: string;
   unCode: string;
@@ -31,28 +27,23 @@ interface OrderRecord {
   deliveryType: string;
   truckType: string;
   stockType: string;
-  // 时间
   inboundDateTime: string;
   arrivalTime: string;
   leaveTime: string;
   customerETA: string;
   commitETA: string;
-  // 数量
   shipQtyPlan: string;
   shipQtyActual: string;
   shipUnit: string;
-  // 收货人信息
   consigneeStreetNo: string;
   consigneeCity: string;
   consigneePostCode: string;
   consigneeCountry: string;
   consigneePIC: string;
-  // 操作日期
   pickDate: string;
   scanDate: string;
   readyDate: string;
   loadDate: string;
-  // Order Detail
   customerSKU: string;
   quantity: string;
   pallet: string;
@@ -66,8 +57,6 @@ const INPUT_STYLE = {
   height: 40,
 };
 
-// 后端地址通过 src/setupProxy.js 代理到 Azure Container Apps，前端用相对路径
-
 /* ── 组件 ─────────────────────────────── */
 const OrderReportPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -80,27 +69,12 @@ const OrderReportPage: React.FC = () => {
   const [customerSKU, setCustomerSKU] = useState('');
   const [dateRange, setDateRange] = useState<[dayjs.Dayjs | null, dayjs.Dayjs | null] | null>(null);
 
-  /* 查询 - 调用后端接口 */
+  /* 查询 */
   const handleSearch = async () => {
     setLoading(true);
 
     try {
-      /*
-       * TODO: 替换为真实 API 调用
-       * 
-       * 接口: POST /api/order-report/search
-       * 请求体:
-       * {
-       *   warehouseCode: string | null,
-       *   orderType: string | null,
-       *   orderRef: string | null,
-       *   sku: string | null,
-       *   orderReceiveDateFrom: string | null,  // ISO 格式: 2024-06-01
-       *   orderReceiveDateTo: string | null     // ISO 格式: 2024-06-30
-       * }
-       * 
-       * 响应: OrderRecord[]
-       */
+      const API_BASE = import.meta.env.VITE_API_BASE || '';
       const params = {
         warehouseCode: warehouseCode.trim() || null,
         orderType: orderType.trim() || null,
@@ -112,11 +86,16 @@ const OrderReportPage: React.FC = () => {
 
       console.log('查询参数:', params);
 
-      const res = await fetch('/api/oldData/orderReport', {
+      const res = await fetch(`${API_BASE}/api/oldData/orderReport`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(params),
       });
+
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
+
       const data = await res.json();
 
       // 后端返回蛇形命名，转为驼峰命名
@@ -169,6 +148,7 @@ const OrderReportPage: React.FC = () => {
       setDataSource(mappedData);
 
     } catch (error) {
+      console.error('查询失败:', error);
       message.error('查询失败，请检查网络连接');
     } finally {
       setLoading(false);
@@ -224,7 +204,7 @@ const OrderReportPage: React.FC = () => {
     <span>{dayjs(text).format('MM-DD HH:mm')}</span>
   ) : <span style={{ color: '#bfbfbf' }}>-</span>;
 
-  /* 表格列 - 按后端字段顺序 */
+  /* 表格列 */
   const columns: ColumnsType<OrderRecord> = [
     // 基础信息
     { title: 'Entity', dataIndex: 'entity', width: 120, render: renderTag },
@@ -232,17 +212,14 @@ const OrderReportPage: React.FC = () => {
     { title: 'Customer Abbrev', dataIndex: 'customerAbbrev', width: 130, render: renderTag },
     { title: 'Warehouse Code', dataIndex: 'warehouseCode', width: 150, render: renderTagColor('cyan') },
     { title: 'Warehouse Name', dataIndex: 'warehouseName', width: 150, render: renderTag },
-
     // 订单信息
     { title: 'Order Type', dataIndex: 'orderType', width: 110, render: (t) => <Tag color={t === 'IN' ? 'green' : 'orange'}>{t === 'IN' ? '入库' : '出库'}</Tag> },
     { title: 'Order Ref', dataIndex: 'orderRef', width: 170, render: renderCode },
     { title: 'Order IB', dataIndex: 'orderIB', width: 120, render: renderCode },
     { title: 'Order Ref RMA', dataIndex: 'orderRefRMA', width: 150, render: renderCode },
-
     // 日期
     { title: 'Order Receive Date', dataIndex: 'orderReceiveDate', width: 160, render: renderDate, sorter: (a, b) => dayjs(a.orderReceiveDate).valueOf() - dayjs(b.orderReceiveDate).valueOf() },
     { title: 'Order Entry Date', dataIndex: 'orderEntryDate', width: 150, render: renderDate },
-
     // 物流信息
     { title: 'Shipment No', dataIndex: 'shipmentNo', width: 140, render: renderCode },
     { title: 'ADR', dataIndex: 'adr', width: 80, render: (t) => t === 'Y' ? <Tag color="red">Y</Tag> : <Tag>N</Tag> },
@@ -252,32 +229,27 @@ const OrderReportPage: React.FC = () => {
     { title: 'Delivery Type', dataIndex: 'deliveryType', width: 120, render: renderTag },
     { title: 'Truck Type', dataIndex: 'truckType', width: 120, render: renderTag },
     { title: 'Stock Type', dataIndex: 'stockType', width: 110, render: renderTag },
-
     // 时间
     { title: 'Inbound Date Time', dataIndex: 'inboundDateTime', width: 160, render: renderDateTime },
     { title: 'Arrival Time', dataIndex: 'arrivalTime', width: 140, render: renderDateTime },
     { title: 'Leave Time', dataIndex: 'leaveTime', width: 140, render: renderDateTime },
     { title: 'Customer ETA', dataIndex: 'customerETA', width: 130, render: renderDate },
     { title: 'Commit ETA', dataIndex: 'commitETA', width: 130, render: renderDate },
-
     // 数量
     { title: 'Ship Qty Plan', dataIndex: 'shipQtyPlan', width: 120, align: 'right', render: (t) => <span style={{ fontWeight: 600 }}>{t}</span> },
     { title: 'Ship Qty Actual', dataIndex: 'shipQtyActual', width: 130, align: 'right', render: (t) => <span style={{ fontWeight: 600, color: t ? '#52c41a' : '#bfbfbf' }}>{t || '-'}</span> },
     { title: 'Ship Unit', dataIndex: 'shipUnit', width: 100, render: renderTag },
-
     // 收货人信息
     { title: 'Consignee Street No', dataIndex: 'consigneeStreetNo', width: 180, render: (t) => <Tooltip title={t}><span>{t?.length > 15 ? t.slice(0, 15) + '...' : t}</span></Tooltip> },
     { title: 'Consignee City', dataIndex: 'consigneeCity', width: 140, render: renderTag },
     { title: 'Consignee Post Code', dataIndex: 'consigneePostCode', width: 160, render: renderCode },
     { title: 'Consignee Country', dataIndex: 'consigneeCountry', width: 150, render: renderTag },
     { title: 'Consignee PIC', dataIndex: 'consigneePIC', width: 140, render: renderTag },
-
     // 操作日期
     { title: 'Pick Date', dataIndex: 'pickDate', width: 120, render: renderDate },
     { title: 'Scan Date', dataIndex: 'scanDate', width: 120, render: renderDate },
     { title: 'Ready Date', dataIndex: 'readyDate', width: 120, render: renderDate },
     { title: 'Load Date', dataIndex: 'loadDate', width: 120, render: renderDate },
-
     // Order Detail
     { title: 'Customer SKU', dataIndex: 'customerSKU', width: 160, render: renderCode },
     { title: 'Quantity', dataIndex: 'quantity', width: 100, align: 'right', render: (t) => <span style={{ fontWeight: 600 }}>{t}</span> },
@@ -313,7 +285,6 @@ const OrderReportPage: React.FC = () => {
               style={INPUT_STYLE}
             />
           </div>
-
           <div>
             <label style={{ display: 'block', fontSize: 12, color: '#8c8c8c', marginBottom: 6, fontWeight: 500 }}>
               Order Type
@@ -326,7 +297,6 @@ const OrderReportPage: React.FC = () => {
               style={INPUT_STYLE}
             />
           </div>
-
           <div>
             <label style={{ display: 'block', fontSize: 12, color: '#8c8c8c', marginBottom: 6, fontWeight: 500 }}>
               Order Ref
@@ -340,7 +310,6 @@ const OrderReportPage: React.FC = () => {
               style={INPUT_STYLE}
             />
           </div>
-
           <div>
             <label style={{ display: 'block', fontSize: 12, color: '#8c8c8c', marginBottom: 6, fontWeight: 500 }}>
               SKU
@@ -354,7 +323,6 @@ const OrderReportPage: React.FC = () => {
               style={INPUT_STYLE}
             />
           </div>
-
           <div>
             <label style={{ display: 'block', fontSize: 12, color: '#8c8c8c', marginBottom: 6, fontWeight: 500 }}>
               Order Receive Date
@@ -422,7 +390,7 @@ const OrderReportPage: React.FC = () => {
           }}
           scroll={{ x: 4200 }}
           locale={{ emptyText: <div style={{ padding: 40, textAlign: 'center', color: '#bfbfbf' }}><p>🔍 请输入筛选条件后点击「查询」</p></div> }}
-          rowClassName={(record, index) => index % 2 === 0 ? '' : 'table-row-stripe'}
+          rowClassName={(_, index) => index % 2 === 0 ? '' : 'table-row-stripe'}
         />
       </Card>
 
