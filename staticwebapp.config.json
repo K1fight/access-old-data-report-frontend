@@ -1,0 +1,42 @@
+{
+  "routes": [
+    {
+      "route": "/*",
+      "serve": "/index.html",
+      "statusCode": 200
+    }
+  ],
+  "platformErrorOverrides": [
+    {
+      "errorType": "NotFound",
+      "serve": "/index.html",
+      "statusCode": 200
+    }
+  ],
+  "responseOverrides": {
+    "400": {
+      "serve": "/index.html",
+      "statusCode": 200
+    },
+    "401": {
+      "serve": "/index.html",
+      "statusCode": 200
+    },
+    "403": {
+      "serve": "/index.html",
+      "statusCode": 200
+    },
+    "404": {
+      "serve": "/index.html",
+      "statusCode": 200
+    }
+  },
+  "mimeTypes": {
+    ".js": "text/javascript",
+    ".mjs": "text/javascript",
+    ".json": "application/json",
+    ".css": "text/css",
+    ".html": "text/html",
+    ".svg": "image/svg+xml"
+  }
+}
