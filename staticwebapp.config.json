@@ -2,7 +2,13 @@
   "routes": [
     {
       "route": "/api/*",
-      "rewrite": "https://rt-access-data-report-service.icysand-9477e6ec.germanywestcentral.azurecontainerapps.io/api/{1}"
+      "allowRoles": [
+        "anonymous",
+        "authenticatied"
+      ],
+      "navigationFallback": {
+        "rewrite": "https://rt-access-data-report-service.icysand-9477e6ec.germanywestcentral.azurecontainerapps.io/api/*"
+      }
     },
     {
       "route": "/*",
