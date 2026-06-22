@@ -1,1 +1,19 @@
-{}
+{
+  "routes": [
+    {
+      "route": "/api/*",
+      "methods": [
+        "get",
+        "post"
+      ],
+      "rewrite": "/api/*",
+      "redirect": "https://rt-access-data-report-service.icysand-9477e6ec.germanywestcentral.azurecontainerapps.io/api/*",
+      "statusCode": 301
+    },
+    {
+      "route": "/*",
+      "serve": "/index.html",
+      "statusCode": 200
+    }
+  ]
+}
